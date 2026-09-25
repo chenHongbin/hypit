@@ -23,6 +23,7 @@ const adapter = createRuntimeEndpointAdapterFacet({
       "pollIntervalMs",
       "requestTimeoutMs",
       "operationTimeoutMs",
+      "publicAssetUrl",
     ], "HiAPI");
     const baseUrl = runtimeConfigString(config.baseUrl, "HiAPI baseUrl");
     if (baseUrl !== undefined) {
@@ -38,6 +39,7 @@ const adapter = createRuntimeEndpointAdapterFacet({
     const pollIntervalMs = runtimeConfigPositiveInteger(config.pollIntervalMs, "HiAPI pollIntervalMs");
     const requestTimeoutMs = runtimeConfigPositiveInteger(config.requestTimeoutMs, "HiAPI requestTimeoutMs");
     const operationTimeoutMs = runtimeConfigPositiveInteger(config.operationTimeoutMs, "HiAPI operationTimeoutMs");
+    const publicAssetUrl = runtimeConfigString(config.publicAssetUrl, "HiAPI publicAssetUrl");
     return {
       endpoint: createHiApiProvider({
         instance: context.instance,
@@ -49,6 +51,12 @@ const adapter = createRuntimeEndpointAdapterFacet({
         ...(pollIntervalMs === undefined ? {} : { pollIntervalMs }),
         ...(requestTimeoutMs === undefined ? {} : { requestTimeoutMs }),
         ...(operationTimeoutMs === undefined ? {} : { operationTimeoutMs }),
+        ...(publicAssetUrl === undefined ? {} : {
+          publicAssetUrl: async (artifact: { mediaType: string }) => {
+            if (!artifact.mediaType.startsWith("video/")) throw new Error("HiAPI publicAssetUrl is only configured for video references");
+            return publicAssetUrl;
+          },
+        }),
       }),
     };
   },
